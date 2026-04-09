@@ -15,14 +15,13 @@
  */
 package com.example.exercisesamplecompose.presentation
 
-import androidx.compose.runtime.CompositionLocalProvider
+
 import androidx.wear.compose.material3.AppScaffold
 import com.example.exercisesamplecompose.data.ServiceState
 import com.example.exercisesamplecompose.presentation.exercise.ExerciseScreen
 import com.example.exercisesamplecompose.presentation.exercise.ExerciseScreenState
 import com.example.exercisesamplecompose.service.ExerciseServiceState
-import com.google.android.horologist.compose.ambient.AmbientState
-import com.google.android.horologist.compose.ambient.LocalAmbientState
+
 import com.google.android.horologist.compose.layout.ResponsiveTimeText
 import com.google.android.horologist.screenshots.FixedTimeSource
 import com.google.android.horologist.screenshots.rng.WearDevice
@@ -55,7 +54,7 @@ class ExerciseScreenTest(
                 timeText = { ResponsiveTimeText(timeSource = FixedTimeSource) }
             ) {
                 ExerciseScreen(
-                    ambientState = AmbientState.Interactive,
+                    isAmbient = false,
                     onPauseClick = {},
                     onEndClick = {},
                     onResumeClick = {},
@@ -80,28 +79,26 @@ class ExerciseScreenTest(
             // Only run for one variant
             Assume.assumeTrue(device == WearDevice.GooglePixelWatch)
 
-            CompositionLocalProvider(LocalAmbientState provides AmbientState.Ambient()) {
-                AppScaffold(
-                    timeText = { ResponsiveTimeText(timeSource = FixedTimeSource) }
-                ) {
-                    ExerciseScreen(
-                        onPauseClick = {},
-                        onEndClick = {},
-                        onResumeClick = {},
-                        onStartClick = {},
-                        uiState =
-                        ExerciseScreenState(
-                            hasExerciseCapabilities = true,
-                            isTrackingAnotherExercise = false,
-                            serviceState =
-                            ServiceState.Connected(
-                                ExerciseServiceState()
-                            ),
-                            exerciseState = ExerciseServiceState()
+            AppScaffold(
+                timeText = { ResponsiveTimeText(timeSource = FixedTimeSource) }
+            ) {
+                ExerciseScreen(
+                    isAmbient = true,
+                    onPauseClick = {},
+                    onEndClick = {},
+                    onResumeClick = {},
+                    onStartClick = {},
+                    uiState =
+                    ExerciseScreenState(
+                        hasExerciseCapabilities = true,
+                        isTrackingAnotherExercise = false,
+                        serviceState =
+                        ServiceState.Connected(
+                            ExerciseServiceState()
                         ),
-                        ambientState = AmbientState.Ambient()
+                        exerciseState = ExerciseServiceState()
                     )
-                }
+                )
             }
         }
 }

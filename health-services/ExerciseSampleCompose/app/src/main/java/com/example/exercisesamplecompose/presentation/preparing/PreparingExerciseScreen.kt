@@ -65,8 +65,8 @@ import com.example.exercisesamplecompose.presentation.ambient.ambientGray
 import com.example.exercisesamplecompose.presentation.dialogs.ExerciseInProgressAlert
 import com.example.exercisesamplecompose.presentation.theme.ThemePreview
 import com.example.exercisesamplecompose.service.ExerciseServiceState
-import com.google.android.horologist.compose.ambient.AmbientAware
-import com.google.android.horologist.compose.ambient.AmbientState
+import androidx.wear.compose.foundation.AmbientMode
+import androidx.wear.compose.foundation.LocalAmbientModeManager
 import com.google.android.horologist.compose.layout.ColumnItemType
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
 
@@ -105,17 +105,17 @@ fun PreparingExerciseRoute(
         }
     }
 
-    AmbientAware { ambientState ->
-        PreparingExerciseScreen(
-            onStart = {
-                viewModel.startExercise()
-                onStart()
-            },
-            uiState = uiState,
-            onGoals = { onGoals() },
-            ambientState = ambientState
-        )
-    }
+    val isAmbient = LocalAmbientModeManager.current?.currentAmbientMode is AmbientMode.Ambient
+
+    PreparingExerciseScreen(
+        onStart = {
+            viewModel.startExercise()
+            onStart()
+        },
+        uiState = uiState,
+        onGoals = { onGoals() },
+        isAmbient = isAmbient
+    )
 
     if (uiState.isTrackingInAnotherApp) {
         var dismissed by remember { mutableStateOf(false) }
@@ -133,7 +133,7 @@ fun PreparingExerciseRoute(
 @Composable
 fun PreparingExerciseScreen(
     uiState: PreparingScreenState,
-    ambientState: AmbientState,
+    isAmbient: Boolean,
     onStart: () -> Unit = {},
     onGoals: () -> Unit = {}
 ) {
@@ -149,7 +149,7 @@ fun PreparingExerciseScreen(
             timeText = {},
             contentPadding = contentPadding,
             modifier = Modifier
-                .ambientGray(ambientState)
+                .ambientGray(isAmbient)
         ) { contentPadding ->
             LocationStatusText(
                 updatePrepareLocationStatus(
@@ -247,7 +247,7 @@ fun PreparingExerciseScreenPreview() {
                 requiredPermissions = PreparingViewModel.permissions,
                 hasExerciseCapabilities = true
             ),
-            ambientState = AmbientState.Interactive
+            isAmbient = false
         )
     }
 }
@@ -265,7 +265,7 @@ fun PreparingExerciseScreenPreviewAmbient() {
                 requiredPermissions = PreparingViewModel.permissions,
                 hasExerciseCapabilities = true
             ),
-            ambientState = AmbientState.Ambient()
+            isAmbient = true
         )
     }
 }
