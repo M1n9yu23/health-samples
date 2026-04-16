@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.withSaveLayer
-import com.google.android.horologist.compose.ambient.AmbientState
+
 
 /**
  * A Paint object configured to apply a grayscale effect.
@@ -47,18 +47,18 @@ private val grayscale =
 /**
  * Applies a grayscale effect and scales down the content when in ambient mode.
  *
- * This modifier checks the provided [AmbientState] to determine if the device is
+ * This modifier checks the provided [isAmbient] to determine if the device is
  * in ambient mode. If it is, the content is scaled down by 10% and a grayscale
  * filter is applied. When not in ambient mode, the content is rendered normally.
  */
-fun Modifier.ambientGray(ambientState: AmbientState): Modifier =
+fun Modifier.ambientGray(isAmbient: Boolean): Modifier =
     graphicsLayer {
-        if (ambientState.isAmbient) {
+        if (isAmbient) {
             scaleX = 0.9f
             scaleY = 0.9f
         }
     }.drawWithContent {
-        if (ambientState.isAmbient) {
+        if (isAmbient) {
             drawIntoCanvas {
                 it.withSaveLayer(size.toRect(), grayscale) {
                     drawContent()
@@ -70,14 +70,14 @@ fun Modifier.ambientGray(ambientState: AmbientState): Modifier =
     }
 
 /**
- * This modifier conditionally draws the content based on the state provided by an [AmbientState].
+ * This modifier conditionally draws the content based on whether it is in ambient mode.
  *
- * If the `isInteractive` property of the provided [ambientState] is true, the content will be drawn.
+ * If [isAmbient] is false, the content will be drawn.
  * Otherwise, the content will not be drawn, effectively leaving the area blank.
  */
-fun Modifier.ambientBlank(ambientState: AmbientState): Modifier =
+fun Modifier.ambientBlank(isAmbient: Boolean): Modifier =
     drawWithContent {
-        if (ambientState.isInteractive) {
+        if (!isAmbient) {
             drawContent()
         }
     }
