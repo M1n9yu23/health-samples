@@ -20,6 +20,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.wear.compose.foundation.LocalAmbientModeManager
+import androidx.wear.compose.foundation.rememberAmbientModeManager
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
@@ -58,16 +61,20 @@ class MainActivity : FragmentActivity() {
         requestPermissions.launch(PreparingViewModel.permissions.toTypedArray())
 
         setContent {
-            navController = rememberSwipeDismissableNavController()
+            val ambientModeManager = rememberAmbientModeManager()
 
-            ExerciseSampleApp(
-                navController,
-                onFinishActivity = { this.finish() }
-            )
+            CompositionLocalProvider(LocalAmbientModeManager provides ambientModeManager) {
+                navController = rememberSwipeDismissableNavController()
 
-            LaunchedEffect(Unit) {
-                prepareIfNoExercise()
-                pendingNavigation = false
+                ExerciseSampleApp(
+                    navController,
+                    onFinishActivity = { this.finish() }
+                )
+
+                LaunchedEffect(Unit) {
+                    prepareIfNoExercise()
+                    pendingNavigation = false
+                }
             }
         }
     }

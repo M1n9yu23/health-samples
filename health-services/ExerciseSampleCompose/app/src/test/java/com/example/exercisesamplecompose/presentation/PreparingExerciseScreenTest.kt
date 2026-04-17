@@ -22,7 +22,7 @@ import com.example.exercisesamplecompose.presentation.preparing.PreparingExercis
 import com.example.exercisesamplecompose.presentation.preparing.PreparingScreenState
 import com.example.exercisesamplecompose.presentation.preparing.PreparingViewModel
 import com.example.exercisesamplecompose.service.ExerciseServiceState
-import com.google.android.horologist.compose.ambient.AmbientState
+
 import com.google.android.horologist.screenshots.rng.WearDevice
 import com.google.android.horologist.screenshots.rng.WearDeviceScreenshotTest
 import org.junit.Assume
@@ -59,20 +59,20 @@ class PreparingExerciseScreenTest(
     fun preparing() =
         runTest {
             AppScaffold {
-                PreparingExerciseScreen(
-                    uiState =
-                    PreparingScreenState.Preparing(
-                        serviceState =
-                        ServiceState.Connected(
-                            ExerciseServiceState()
-                        ),
-                        isTrackingInAnotherApp = false,
-                        requiredPermissions = PreparingViewModel.permissions,
-                        hasExerciseCapabilities = true
-                    ),
-                    ambientState = AmbientState.Interactive
-                )
-            }
+                    PreparingExerciseScreen(
+                        uiState =
+                            PreparingScreenState.Preparing(
+                                serviceState =
+                                    ServiceState.Connected(
+                                        ExerciseServiceState()
+                                    ),
+                                isTrackingInAnotherApp = false,
+                                requiredPermissions = PreparingViewModel.permissions,
+                                hasExerciseCapabilities = true
+                            ),
+                        isAmbient = false
+                    )
+                }
         }
 
     @Test
@@ -93,7 +93,7 @@ class PreparingExerciseScreenTest(
                         requiredPermissions = PreparingViewModel.permissions,
                         hasExerciseCapabilities = true
                     ),
-                    ambientState = AmbientState.Ambient()
+                    isAmbient = true
                 )
             }
         }

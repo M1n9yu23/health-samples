@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.wear.compose.foundation.AmbientMode
+import androidx.wear.compose.foundation.LocalAmbientModeManager
 import androidx.wear.compose.foundation.pager.HorizontalPager
 import androidx.wear.compose.foundation.pager.rememberPagerState
 import androidx.wear.compose.material3.AlertDialog
@@ -49,6 +51,7 @@ import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.example.exercisesamplecompose.R
 import com.example.exercisesamplecompose.data.ServiceState
+import com.example.exercisesamplecompose.presentation.ambient.ambientGray
 import com.example.exercisesamplecompose.presentation.component.CaloriesText
 import com.example.exercisesamplecompose.presentation.component.DistanceText
 import com.example.exercisesamplecompose.presentation.component.HRText
@@ -62,8 +65,6 @@ import com.example.exercisesamplecompose.presentation.summary.SummaryScreenState
 import com.example.exercisesamplecompose.presentation.theme.ThemePreview
 import com.example.exercisesamplecompose.service.ExerciseServiceState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import com.google.android.horologist.compose.ambient.AmbientAware
-import com.google.android.horologist.compose.ambient.AmbientState
 import com.google.android.horologist.health.composables.ActiveDurationText
 import kotlinx.coroutines.launch
 
@@ -90,17 +91,17 @@ fun ExerciseRoute(
             uiState = uiState
         )
     } else {
-        AmbientAware { ambientState ->
-            ExerciseScreen(
-                ambientState = ambientState,
-                onPauseClick = { viewModel.pauseExercise() },
-                onEndClick = { viewModel.endExercise() },
-                onResumeClick = { viewModel.resumeExercise() },
-                onStartClick = { viewModel.startExercise() },
-                uiState = uiState,
-                modifier = modifier
-            )
-        }
+        val isAmbient = LocalAmbientModeManager.current?.currentAmbientMode is AmbientMode.Ambient
+
+        ExerciseScreen(
+            isAmbient = isAmbient,
+            onPauseClick = { viewModel.pauseExercise() },
+            onEndClick = { viewModel.endExercise() },
+            onResumeClick = { viewModel.resumeExercise() },
+            onStartClick = { viewModel.startExercise() },
+            uiState = uiState,
+            modifier = modifier
+        )
     }
 }
 
@@ -148,7 +149,7 @@ fun ErrorStartingExerciseScreen(
  */
 @Composable
 fun ExerciseScreen(
-    ambientState: AmbientState,
+    isAmbient: Boolean,
     onPauseClick: () -> Unit,
     onEndClick: () -> Unit,
     onResumeClick: () -> Unit,
@@ -162,27 +163,31 @@ fun ExerciseScreen(
         pageCount = { 2 }
     )
 
-    HorizontalPagerScaffold(pagerState = pagerState) {
-        HorizontalPager(
-            state = pagerState
-        ) { page ->
-            ScreenScaffold {
-                if (page == 0) {
-                    ExerciseControlButtons(
-                        uiState = uiState,
-                        onStartClick = onStartClick,
-                        onEndClick = onEndClick,
-                        onResumeClick = {
-                            onResumeClick()
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(1)
-                            }
-                        },
-                        onPauseClick = {
-                            onPauseClick()
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(1)
-                            }
+        HorizontalPagerScaffold(pagerState = pagerState) {
+            HorizontalPager(
+                state = pagerState
+            ) { page ->
+                ScreenScaffold(modifier = Modifier.ambientGray(isAmbient)) {
+                        if (page == 0) {
+                            ExerciseControlButtons(
+                                uiState = uiState,
+                                onStartClick = onStartClick,
+                                onEndClick = onEndClick,
+                                onResumeClick = {
+                                    onResumeClick()
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(1)
+                                    }
+                                },
+                                onPauseClick = {
+                                    onPauseClick()
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(1)
+                                    }
+                                }
+                            )
+                        } else {
+                            ExerciseMetrics(uiState = uiState)
                         }
                     )
                 } else {
@@ -321,6 +326,7 @@ private fun DurationRow(uiState: ExerciseScreenState) {
 fun ExerciseScreenPreview() {
     ThemePreview {
         ExerciseScreen(
+            isAmbient = false,
             onPauseClick = {},
             onEndClick = {},
             onResumeClick = {},
@@ -332,8 +338,7 @@ fun ExerciseScreenPreview() {
                     ExerciseServiceState()
                 ),
                 exerciseState = ExerciseServiceState()
-            ),
-            ambientState = AmbientState.Interactive
+            )
         )
     }
 }
