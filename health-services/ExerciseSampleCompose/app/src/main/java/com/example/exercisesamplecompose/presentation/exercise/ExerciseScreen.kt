@@ -159,9 +159,7 @@ fun ExerciseScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
-        initialPage = 1,
-        pageCount = { 2 }
-    )
+        initialPage = 1, pageCount = { 2 })
 
         HorizontalPagerScaffold(pagerState = pagerState) {
             HorizontalPager(
@@ -189,22 +187,18 @@ fun ExerciseScreen(
                         } else {
                             ExerciseMetrics(uiState = uiState)
                         }
-                    )
-                } else {
-                    ExerciseMetrics(uiState = uiState)
+                    }
                 }
+
+            // If we meet an exercise goal, show our exercise met dialog.
+            // This approach is for the sample, and doesn't guarantee processing of this event in all cases,
+            // such as the user exiting the app while this is in-progress. Consider alternatives to exposing
+            // state in a production app.
+            uiState.exerciseState?.exerciseGoal?.let {
+                Log.d("ExerciseGoalMet", "Showing exercise goal met dialog")
+                ExerciseGoalMet(it.isNotEmpty())
             }
         }
-
-        // If we meet an exercise goal, show our exercise met dialog.
-        // This approach is for the sample, and doesn't guarantee processing of this event in all cases,
-        // such as the user exiting the app while this is in-progress. Consider alternatives to exposing
-        // state in a production app.
-        uiState.exerciseState?.exerciseGoal?.let {
-            Log.d("ExerciseGoalMet", "Showing exercise goal met dialog")
-            ExerciseGoalMet(it.isNotEmpty())
-        }
-    }
 }
 
 @Composable
